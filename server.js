@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import config from './config.js';
 import connectDB from './config/db.js';
 import dotenv from 'dotenv';
 const app = express();
@@ -13,23 +12,22 @@ const io = new Server(server, {
     }
 });
 
+
 // Middleware
 dotenv.config();
 app.use(cors());
 app.use(express.json());
 
-// Store io instance for use in routes
 app.set('io', io);
 
 // Routes
 import matchesRouter from './routes/matches.js';
 app.use('/matches', matchesRouter);
 
-// Socket.IO connection handling
+// socket connection
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
-    // Join match room for real-time updates
     socket.on('joinMatch', (matchId) => {
         socket.join(`match-${matchId}`);
         console.log(`Client ${socket.id} joined match ${matchId}`);
@@ -40,9 +38,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// Connect to MongoDB
+// connect to MongoDB
 connectDB()
-// Start server
-server.listen(config.PORT, () => {
-    console.log(`Server running on port ${config.PORT}`);
+
+// rtart server
+server.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
 });
